@@ -206,3 +206,16 @@ input:focus, select:focus {
 @media (min-width: 1400px) {
     .catalog-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* Corrección para desplegables en navegadores (especialmente móviles) */
+select option {
+    background-color: #1a1a1a !important; /* Fondo oscuro */
+    color: #ffffff !important;           /* Letras blancas */
+    padding: 10px;
+}
+
+/* Estilo para el estado del select cuando está abierto */
+select:focus option:checked {
+    background: #ff8c00 !important;
+    color: #000 !important;
+}
