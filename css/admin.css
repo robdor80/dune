@@ -1,0 +1,63 @@
+/* Estilos específicos para Administrador */
+body {
+    background-color: #0d0d0d;
+    color: #e0e0e0;
+    font-family: sans-serif;
+}
+
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Formulario Dinámico */
+.form-row {
+    display: flex;
+    flex-direction: column; /* Móvil por defecto */
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.ingredient-row {
+    display: grid;
+    grid-template-columns: 1fr 80px auto; /* Item, Cantidad, Borrar */
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+/* --- MEDIA QUERIES --- */
+
+/* Tablet Horizontal y PC (Más de 1024px) */
+@media (min-width: 1025px) {
+    .form-row {
+        flex-direction: row;
+    }
+    .form-row > div {
+        flex: 1;
+    }
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}
+
+/* Móvil y Tablet Vertical (Hasta 1024px) */
+@media (max-width: 1024px) {
+    h1 { font-size: 1.5rem; }
+    .btn-primary { width: 100%; padding: 15px; } /* Botones más grandes para dedos */
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Una columna en móvil */
+    }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dune Awakening - Mi Base</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="dune-dark">
+
+    <nav class="main-nav">
+        <a href="index.html">Calculadora</a>
+        <a href="base.html" class="active">Mi Base</a>
+        <a href="admin.html">Administrador</a>
+    </nav>
+
+    <main class="container">
+        <h1>Estado de la Base</h1>
+
+        <div class="base-layout">
+            <aside class="sidebar-controls">
+                <section class="card">
+                    <h3>Filtros de Mapa</h3>
+                    <select id="floorSelect">
+                        <option value="p0">Planta Baja (P0)</option>
+                        <option value="p1">Piso 1 (P1)</option>
+                        <option value="p2">Piso 2 (P2)</option>
+                    </select>
+                    <div class="filter-group" style="margin-top: 10px;">
+                        <button class="btn-secondary" onclick="filterMap('todas')">Todas</button>
+                        <button class="btn-secondary" onclick="filterMap('agua')">Agua</button>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h3>Censo de Máquinas</h3>
+                    <div id="censusList">
+                        </div>
+                </section>
+            </aside>
+
+            <section class="map-area">
+                <div class="map-container" id="mapWrapper">
+                    <img src="assets/planos/default.png" id="mapImage" alt="Plano de la base">
+                    <div id="markersLayer"></div>
+                </div>
+                <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                    <i class="fas fa-info-circle"></i> Haz clic en el mapa para obtener coordenadas.
+                </p>
+                <div id="coordDisplay" class="card" style="margin-top:10px; padding: 10px; display:none;">
+                    Coordenadas seleccionadas: <strong id="currentCoords">X: 0%, Y: 0%</strong>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script src="js/db.js"></script>
+    <script src="js/base.js"></script>
+</body>
+</html>

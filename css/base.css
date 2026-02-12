@@ -1,0 +1,46 @@
+/* Estilos para el Mapa y Censo */
+.map-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 2px solid #ff8c00;
+    background: #000;
+}
+
+#mapImage {
+    width: 100%;
+    display: block;
+}
+
+/* Los "Pins" o marcadores */
+.marker {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: rgba(0, 170, 255, 0.7);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%); /* Centrar el punto exacto */
+    cursor: pointer;
+}
+
+/* --- MEDIA QUERIES --- */
+
+@media (max-width: 1024px) {
+    .base-layout {
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar-controls {
+        order: 2; /* Los controles debajo del mapa en móvil */
+        width: 100%;
+    }
+}
+
+@media (min-width: 1025px) {
+    .base-layout {
+        display: grid;
+        grid-template-columns: 300px 1fr; /* Controles a la izquierda, mapa a la derecha */
+        gap: 20px;
+    }
+}

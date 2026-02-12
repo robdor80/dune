@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dune Admin - Catálogo y Recetas</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="dune-dark">
+
+    <nav class="main-nav">
+        <a href="index.html">Calculadora</a>
+        <a href="base.html">Mi Base</a>
+        <a href="admin.html" class="active">Administrador</a>
+    </nav>
+
+    <main class="container">
+        <h1>Gestión de Objetos y Recetas</h1>
+
+        <section class="card">
+            <h2>Crear Nuevo Objeto</h2>
+            <form id="itemForm">
+                <div class="form-group">
+                    <label>Nombre del Objeto:</label>
+                    <input type="text" id="itemName" placeholder="Ej: Lingote de Acero" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría:</label>
+                        <select id="itemCategory">
+                            <option value="Basicos">Materiales Básicos</option>
+                            <option value="Procesados">Procesados / Refinados</option>
+                            <option value="Componentes">Componentes Complejos</option>
+                            <option value="Estaciones">Estaciones de Trabajo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>¿Es Materia Prima?</label>
+                        <select id="isRaw" onchange="toggleRecipe()">
+                            <option value="no">No (Se fabrica)</option>
+                            <option value="yes">Sí (Se recolecta)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="recipeSection">
+                    <h3>Receta de Fabricación</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Rendimiento (¿Cuántos salen?):</label>
+                            <input type="number" id="yield" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Estación Necesaria:</label>
+                            <input type="text" id="station" placeholder="Ej: Refinería">
+                        </div>
+                    </div>
+
+                    <div id="ingredientsList">
+                        <label>Ingredientes:</label>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="addIngredientRow()">
+                        <i class="fas fa-plus"></i> Añadir Ingrediente
+                    </button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar Objeto en la Especia</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Catálogo Existente</h2>
+            <div id="itemsCatalog" class="catalog-grid">
+                <p>Cargando catálogo...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script src="js/db.js"></script>
+    <script src="js/admin.js"></script>
+
+    <script>
+        // Función rápida para ocultar/mostrar receta en el formulario
+        function toggleRecipe() {
+            const isRaw = document.getElementById('isRaw').value;
+            const section = document.getElementById('recipeSection');
+            section.style.display = (isRaw === 'yes') ? 'none' : 'block';
+        }
+    </script>
+</body>
+
+</html>
