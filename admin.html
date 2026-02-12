@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,20 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff8c00">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('PWA lista para Arrakis', reg))
+                    .catch(err => console.log('Error PWA', err));
+            });
+        }
+    </script>
 </head>
+
 <body class="dune-dark">
 
     <nav class="main-nav">
@@ -18,7 +32,7 @@
 
     <main class="container">
         <h1>Gestión de Objetos y Recetas</h1>
-        
+
         <section class="card">
             <h2>Crear Nuevo Objeto</h2>
             <form id="itemForm">
@@ -88,7 +102,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
+
     <script src="js/db.js"></script>
     <script src="js/admin.js"></script>
 
@@ -100,4 +114,5 @@
         }
     </script>
 </body>
+
 </html>

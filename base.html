@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,20 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff8c00">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('PWA lista para Arrakis', reg))
+                    .catch(err => console.log('Error PWA', err));
+            });
+        }
+    </script>
 </head>
+
 <body class="dune-dark">
 
     <nav class="main-nav">
@@ -37,7 +51,7 @@
                 <section class="card">
                     <h3>Censo de Máquinas</h3>
                     <div id="censusList">
-                        </div>
+                    </div>
                 </section>
             </aside>
 
@@ -58,8 +72,9 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
+
     <script src="js/db.js"></script>
     <script src="js/base.js"></script>
 </body>
+
 </html>
