@@ -1,4 +1,3 @@
-// Configuración de Firebase de tu proyecto "dune-1aab2"
 const firebaseConfig = {
   apiKey: "AIzaSyCyZToFrHjgccIE8870W_l8lyIbjO1X-JM",
   authDomain: "dune-1aab2.firebaseapp.com",
@@ -11,13 +10,12 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Inicializar servicios
+// Inicializar SOLO Firestore (Base de datos)
 const db = firebase.firestore();
-const storage = firebase.storage();
 
-// Referencias a las colecciones que usaremos
-const itemsRef = db.collection("dune_items");          // Catálogo y recetas
-const baseRef = db.collection("dune_base_machines");  // Máquinas en el plano
-const planosRef = db.collection("dune_planos");       // Imágenes de los pisos
+// Referencias
+const itemsRef = db.collection("dune_items");
+const baseRef = db.collection("dune_base_machines");
+const planosRef = db.collection("dune_planos");
 
-console.log("🔥 Firebase conectado correctamente al proyecto: dune-1aab2");
+console.log("🔥 Conexión limpia: Firestore activo.");
