@@ -1,11 +1,9 @@
 // --- Lógica de la Interfaz del Formulario ---
 
-// Función para añadir una fila de ingrediente al formulario
 function addIngredientRow() {
     const container = document.getElementById('ingredientsList');
     const div = document.createElement('div');
     div.className = 'ingredient-row';
-    
     div.innerHTML = `
         <input type="text" class="ing-name" placeholder="Nombre ingrediente" required>
         <input type="number" class="ing-qty" placeholder="Cant." min="0.1" step="0.1" required>
@@ -18,14 +16,12 @@ function addIngredientRow() {
 
 // --- Operaciones con Firebase ---
 
-// Guardar objeto
 document.getElementById('itemForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const isRaw = document.getElementById('isRaw').value === 'yes';
     const ingredients = [];
     
-    // Si no es materia prima, recopilamos los ingredientes
     if (!isRaw) {
         document.querySelectorAll('.ingredient-row').forEach(row => {
             ingredients.push({
@@ -37,6 +33,7 @@ document.getElementById('itemForm').addEventListener('submit', async (e) => {
 
     const newItem = {
         nombre: document.getElementById('itemName').value,
+        imagen: document.getElementById('itemImg').value || "https://via.placeholder.com/80?text=DUNE",
         categoria: document.getElementById('itemCategory').value,
         esMateriaPrima: isRaw,
         rendimiento: isRaw ? 1 : parseFloat(document.getElementById('yield').value),
@@ -50,14 +47,13 @@ document.getElementById('itemForm').addEventListener('submit', async (e) => {
         alert("¡Objeto guardado en la Especia!");
         document.getElementById('itemForm').reset();
         document.getElementById('ingredientsList').innerHTML = "";
-        loadCatalog(); // Recargar lista
+        loadCatalog(); 
     } catch (error) {
         console.error("Error al guardar:", error);
         alert("Error al conectar con Arrakis");
     }
 });
 
-// Cargar catálogo de objetos
 async function loadCatalog() {
     const catalogDiv = document.getElementById('itemsCatalog');
     catalogDiv.innerHTML = "<p>Sincronizando con la base...</p>";
@@ -71,16 +67,21 @@ async function loadCatalog() {
             const badge = document.createElement('div');
             badge.className = 'item-badge';
             badge.innerHTML = `
-                <h4>${item.nombre}</h4>
-                <small>Categoría: ${item.categoria}</small>
-                <small>${item.esMateriaPrima ? '🌿 Materia Prima' : '⚙️ Fabricado'}</small>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${item.imagen}" style="width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #ff8c00;">
+                    <div>
+                        <h4>${item.nombre}</h4>
+                        <small>Cat: ${item.categoria}</small>
+                        <small>${item.esMateriaPrima ? '🌿 Recolectable' : '⚙️ Fabricado'}</small>
+                    </div>
+                </div>
             `;
             catalogDiv.appendChild(badge);
         });
     } catch (error) {
+        console.error("Error al cargar:", error);
         catalogDiv.innerHTML = "<p>Error al cargar catálogo.</p>";
     }
 }
 
-// Ejecutar al cargar la página
 loadCatalog();

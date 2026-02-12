@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body class="dune-dark">
 
     <nav class="main-nav">
@@ -20,13 +18,18 @@
 
     <main class="container">
         <h1>Gestión de Objetos y Recetas</h1>
-
+        
         <section class="card">
             <h2>Crear Nuevo Objeto</h2>
             <form id="itemForm">
                 <div class="form-group">
                     <label>Nombre del Objeto:</label>
                     <input type="text" id="itemName" placeholder="Ej: Lingote de Acero" required>
+                </div>
+
+                <div class="form-group">
+                    <label>URL de la Imagen (Icono):</label>
+                    <input type="url" id="itemImg" placeholder="https://ejemplo.com/imagen.png">
                 </div>
 
                 <div class="form-row">
@@ -69,7 +72,7 @@
                     </button>
                 </div>
 
-                <div class="form-actions">
+                <div class="form-actions" style="margin-top: 20px;">
                     <button type="submit" class="btn-primary">Guardar Objeto en la Especia</button>
                 </div>
             </form>
@@ -85,12 +88,11 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
+    
     <script src="js/db.js"></script>
     <script src="js/admin.js"></script>
 
     <script>
-        // Función rápida para ocultar/mostrar receta en el formulario
         function toggleRecipe() {
             const isRaw = document.getElementById('isRaw').value;
             const section = document.getElementById('recipeSection');
@@ -98,5 +100,4 @@
         }
     </script>
 </body>
-
 </html>
