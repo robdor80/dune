@@ -4,13 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dune Awakening - Calculadora y Dashboard</title>
+    <title>Dune Awakening - Centro de Mando</title>
+    
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff8c00">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -35,29 +38,26 @@
 
         <section class="card" style="border-color: #00aaff; background: rgba(0, 170, 255, 0.05);">
             <h2><i class="fas fa-shield-alt"></i> Estado del Escudo Defensivo</h2>
-            <div
-                style="display: flex; justify-content: space-around; align-items: center; text-align: center; padding: 10px; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; padding: 10px; flex-wrap: wrap; gap: 20px;">
                 <div>
-                    <p style="font-size: 0.8rem; color: #888;">TIEMPO RESTANTE</p>
-                    <h1 id="shieldTimer" style="color: #00aaff; margin: 5px 0; font-size: 3rem;">00:00:00</h1>
+                    <p style="font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">Tiempo Restante</p>
+                    <h1 id="shieldTimer" style="color: #00aaff; margin: 10px 0; font-size: 3.5rem; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 170, 255, 0.5);">00:00:00</h1>
                 </div>
-                <div>
-                    <button class="btn-secondary" onclick="updateShield(1)">+ 1h Energía</button>
-                    <button class="btn-secondary" onclick="updateShield(5)" style="margin-top:10px;">+ 5h
-                        Energía</button>
-                    <button class="btn-secondary" onclick="updateShield(-1)"
-                        style="margin-top:10px; border-color: #ff4444; color: #ff4444;">- 1h (Gasto)</button>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-secondary" onclick="updateShield(1)"><i class="fas fa-plus"></i> 1h Energía</button>
+                    <button class="btn-secondary" onclick="updateShield(5)"><i class="fas fa-plus"></i> 5h Energía</button>
+                    <button class="btn-secondary" onclick="updateShield(-1)" style="border-color: #ff4444; color: #ff4444;"><i class="fas fa-minus"></i> 1h (Gasto)</button>
                 </div>
             </div>
         </section>
 
         <section class="card">
-            <h2>Calculadora de Fabricación</h2>
+            <h2><i class="fas fa-calculator"></i> Calculadora de Fabricación</h2>
             <div class="form-row">
                 <div class="form-group">
                     <label>Objeto a fabricar:</label>
                     <select id="calcItemSelect">
-                        <option value="">Cargando objetos...</option>
+                        <option value="">Cargando catálogo...</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -65,14 +65,15 @@
                     <input type="number" id="calcQuantity" value="1" min="1">
                 </div>
             </div>
-            <button id="btnCalculate" class="btn-primary">Calcular Desglose</button>
+            <button id="btnCalculate" class="btn-primary">Calcular Desglose Total</button>
         </section>
 
-        <section id="resultSection" class="card" style="display:none;">
-            <h2>Resultados</h2>
-            <div id="rawMaterialsList"></div>
-            <hr style="margin:20px 0; border:0; border-top:1px solid #333;">
-            <div id="craftingSteps"></div>
+        <section id="resultSection" class="card" style="display:none; border-left-color: #ff8c00;">
+            <h2><i class="fas fa-list-ul"></i> Materias Primas Necesarias</h2>
+            <div id="rawMaterialsList">
+                </div>
+            
+            <div id="craftingSteps" style="margin-top: 20px;"></div>
         </section>
     </main>
 

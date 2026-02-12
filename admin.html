@@ -5,12 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dune Admin - Catálogo y Recetas</title>
+    
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff8c00">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -107,11 +111,15 @@
     <script src="js/admin.js"></script>
 
     <script>
+        // Función para ocultar/mostrar receta
         function toggleRecipe() {
             const isRaw = document.getElementById('isRaw').value;
             const section = document.getElementById('recipeSection');
             section.style.display = (isRaw === 'yes') ? 'none' : 'block';
         }
+
+        // Asegurar estado inicial al cargar
+        window.onload = toggleRecipe;
     </script>
 </body>
 
