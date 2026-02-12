@@ -1,14 +1,208 @@
-/* Añadir esto al final de tu admin.css */
+/* --- ESTILO TÁCTICO PREMIUM - DUNE AWAKENING --- */
 
-.item-badge .btn-secondary:hover {
-    background: rgba(0, 170, 255, 0.2);
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+body {
+    background-color: #050505;
+    color: #e0e0e0;
+    font-family: 'Rajdhani', sans-serif;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(255, 140, 0, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0, 170, 255, 0.05) 0%, transparent 40%);
+    background-attachment: fixed;
+    margin: 0;
 }
 
-.item-badge button[onclick*="deleteItem"]:hover {
-    background: rgba(255, 68, 68, 0.2) !important;
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Animación sutil al entrar en modo edición */
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    color: #ff8c00;
+    text-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    margin: 30px 0;
+}
+
+/* Tarjetas con efecto Glassmorphism */
+.card {
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 4px solid #ff8c00;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+}
+
+h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: #00aaff;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Formulario Estilizado */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ff8c00;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus, select:focus {
+    border-color: #00aaff;
+    background: rgba(0, 170, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.2);
+    outline: none;
+}
+
+/* Botones de Acción */
 .btn-primary {
-    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ff8c00 0%, #ff4500 100%);
+    color: #000;
+    border: none;
+    padding: 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    width: 100%;
+    transition: 0.4s;
+    box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 69, 0, 0.5);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 170, 255, 0.5);
+    color: #00aaff;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 170, 255, 0.15);
+    border-color: #00aaff;
+}
+
+/* Filas de Ingredientes (Efecto lista táctica) */
+.ingredient-row {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    display: grid;
+    grid-template-columns: 1fr 90px auto;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #ff4444;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: 0.2s;
+}
+
+.btn-remove:hover { transform: scale(1.2); }
+
+/* Catálogo Estilo Inventario */
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.item-badge {
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid #222;
+    padding: 15px;
+    border-radius: 12px;
+    position: relative;
+    transition: 0.3s;
+}
+
+.item-badge:hover {
+    border-color: #ff8c00;
+    background: rgba(255, 140, 0, 0.02);
+}
+
+.item-badge h4 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ff8c00;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* --- MEDIA QUERIES Específicas --- */
+
+/* Móvil y Tablet Vertical (Hasta 1024px) */
+@media (max-width: 1024px) {
+    .container { padding: 10px; }
+    h1 { font-size: 1.4rem; letter-spacing: 2px; }
+    .form-row { flex-direction: column; gap: 10px; }
+    .card { padding: 15px; }
+    .catalog-grid { grid-template-columns: 1fr; }
+    
+    /* Botones más grandes para fácil clic con el dedo */
+    .btn-secondary { padding: 12px; font-size: 0.9rem; }
+}
+
+/* Tablet Horizontal y PC (Más de 1024px) */
+@media (min-width: 1025px) {
+    .form-row { display: flex; flex-direction: row; gap: 20px; }
+    .form-row > div { flex: 1; }
+    .catalog-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* PC Grande */
+@media (min-width: 1400px) {
+    .catalog-grid { grid-template-columns: repeat(3, 1fr); }
 }
