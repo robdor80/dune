@@ -1,4 +1,4 @@
-/* --- ESTILOS GENERALES DEL CENSO --- */
+/* --- CONTENEDOR PRINCIPAL Y TÍTULO --- */
 .main-title {
     color: #ff8c00;
     text-transform: uppercase;
@@ -6,13 +6,15 @@
     margin-bottom: 30px;
     text-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
     font-size: 2rem;
+    text-align: center;
 }
 
+/* --- TARJETA DEL FORMULARIO DE REGISTRO --- */
 .census-card-form {
     background: rgba(20, 20, 20, 0.9);
     border: 1px solid #333;
     border-radius: 12px;
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 40px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
@@ -22,12 +24,14 @@
     font-size: 0.9rem;
     margin-bottom: 20px;
     text-transform: uppercase;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
 }
 
 .census-form {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 20px;
     align-items: flex-end;
 }
 
@@ -36,52 +40,75 @@
     flex-direction: column;
     gap: 8px;
     flex: 1;
-    min-width: 180px;
+    min-width: 200px;
 }
 
 .input-group label {
     font-size: 0.75rem;
-    color: #aaa;
+    color: #ff8c00;
     text-transform: uppercase;
     font-weight: bold;
+    letter-spacing: 1px;
 }
 
-.input-group select, .input-group input {
+.input-group select, 
+.input-group input {
     background: #0a0a0a;
     border: 1px solid #444;
     color: #fff;
     padding: 12px;
     border-radius: 6px;
     font-size: 0.95rem;
+    transition: border-color 0.3s;
 }
 
-.qty-group { max-width: 90px; min-width: 80px; }
+.input-group select:focus, 
+.input-group input:focus {
+    border-color: #ff8c00;
+    outline: none;
+}
+
+.qty-group {
+    max-width: 100px;
+    min-width: 80px;
+}
 
 .btn-add-census {
     background: #ff8c00;
     color: white;
     border: none;
-    padding: 12px 30px;
+    padding: 0 30px;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.3s;
-    height: 50px;
+    transition: all 0.3s;
+    height: 48px;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .btn-add-census:hover {
     background: #ffa500;
     box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
+    transform: translateY(-2px);
 }
 
-/* --- LISTADO POR ZONAS --- */
+/* --- SECCIÓN DE LISTADO Y FILTROS --- */
+.display-header {
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
 .zones-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 25px;
 }
 
+/* --- TARJETAS DE ZONA --- */
 .census-zone-card {
     background: rgba(30, 30, 30, 0.7);
     border: 1px solid #444;
@@ -89,18 +116,23 @@
     padding: 20px;
     border-top: 3px solid #00aaff;
     backdrop-filter: blur(10px);
+    height: fit-content;
 }
 
 .census-zone-card h3 {
     color: #00aaff;
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-transform: uppercase;
     padding-bottom: 12px;
     margin-bottom: 20px;
     border-bottom: 1px solid rgba(0, 170, 255, 0.2);
     letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
+/* --- FILAS DE ITEMS --- */
 .census-item {
     display: flex;
     justify-content: space-between;
@@ -109,45 +141,80 @@
     padding: 12px;
     margin-bottom: 10px;
     border-radius: 8px;
-    transition: transform 0.2s;
+    border: 1px solid transparent;
+    transition: all 0.2s;
 }
 
 .census-item:hover {
     transform: translateX(5px);
-    background: rgba(255, 140, 0, 0.05);
+    background: rgba(255, 140, 0, 0.08);
+    border-color: rgba(255, 140, 0, 0.3);
 }
 
-.census-item .info { display: flex; align-items: center; gap: 15px; }
+.census-item .info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
 .census-img {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     object-fit: contain;
     border-radius: 6px;
     background: #111;
     border: 1px solid #333;
-    padding: 2px;
+    padding: 4px;
 }
 
-.census-item .qty { color: #ff8c00; font-weight: bold; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; }
-.census-item .name { color: #eee; font-size: 0.95rem; font-weight: 500; }
+.census-item .qty {
+    color: #ff8c00;
+    font-weight: bold;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    min-width: 35px;
+}
+
+.census-item .name {
+    color: #eee;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
 .census-item .planta-tag {
     font-size: 0.65rem;
     background: #444;
-    padding: 3px 6px;
+    padding: 3px 8px;
     border-radius: 4px;
     color: #fff;
     text-transform: uppercase;
+    font-weight: bold;
+    margin-left: 10px;
 }
 
+/* --- BOTÓN ELIMINAR --- */
 .btn-del {
     color: #ff4444;
-    background: none;
+    background: rgba(255, 68, 68, 0.1);
     border: none;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1rem;
     padding: 8px;
-    transition: 0.2s;
+    border-radius: 4px;
+    transition: all 0.2s;
 }
 
-.btn-del:hover { color: #ff6666; transform: scale(1.2); }
+.btn-del:hover {
+    background: #ff4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* MENSAJES DE ESTADO */
+.status-msg {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-style: italic;
+    grid-column: 1 / -1;
+}

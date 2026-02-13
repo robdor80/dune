@@ -12,9 +12,7 @@ async function loadItemSelect() {
         
         snap.forEach(doc => {
             const item = doc.data();
-            if (item.imagen) {
-                itemImages[item.nombre] = item.imagen;
-            }
+            if (item.imagen) itemImages[item.nombre] = item.imagen;
             if (item.categoria !== "Basicos") {
                 const opt = document.createElement('option');
                 opt.value = item.nombre;
@@ -23,10 +21,8 @@ async function loadItemSelect() {
                 select.appendChild(opt);
             }
         });
-        loadCensus(); // Carga inicial
-    } catch (e) { 
-        console.error("Error catálogo:", e);
-    }
+        loadCensus(); 
+    } catch (e) { console.error("Error catálogo:", e); }
 }
 
 // 2. GUARDAR REGISTRO
@@ -46,34 +42,41 @@ censusForm.addEventListener('submit', async (e) => {
     } catch (e) { alert("Error al guardar"); }
 });
 
-// 3. CARGAR CENSO (FILTRO CORREGIDO)
+// 3. CARGAR Y FILTRAR (Lógica local para evitar errores de Firebase)
 async function loadCensus() {
     const floorFilter = document.getElementById('filterFloor').value;
     censusContainer.innerHTML = "<p style='color: #888; padding: 20px;'>Sincronizando con Arrakis...</p>";
 
     try {
-        let query = censusRef.orderBy("zona");
-        
-        // CORRECCIÓN: Filtrado por planta
-        if (floorFilter !== "all") {
-            query = query.where("planta", "==", floorFilter);
-        }
-
-        const snap = await query.get();
-        censusContainer.innerHTML = ""; // Limpiamos el mensaje de sincronización
+        // Obtenemos todos los registros ordenados por zona
+        const snap = await censusRef.orderBy("zona").get();
+        censusContainer.innerHTML = ""; 
 
         if (snap.empty) {
-            censusContainer.innerHTML = `<div style='color:#666; padding:20px;'>No hay maquinaria en ${floorFilter === 'all' ? 'toda la base' : floorFilter}.</div>`;
+            censusContainer.innerHTML = "<div style='color:#666; padding:20px;'>El censo está vacío. Registra algo para empezar.</div>";
             return;
         }
 
         const groups = {};
+        let itemsFound = false;
+
         snap.forEach(doc => {
             const d = doc.data();
-            if (!groups[d.zona]) groups[d.zona] = [];
-            groups[d.zona].push({ id: doc.id, ...d });
+            
+            // FILTRADO LOCAL: Si el filtro es "all" o coincide con la planta
+            if (floorFilter === "all" || d.planta === floorFilter) {
+                itemsFound = true;
+                if (!groups[d.zona]) groups[d.zona] = [];
+                groups[d.zona].push({ id: doc.id, ...d });
+            }
         });
 
+        if (!itemsFound) {
+            censusContainer.innerHTML = `<div style='color:#666; padding:20px;'>No hay maquinaria registrada en ${floorFilter}.</div>`;
+            return;
+        }
+
+        // Renderizamos las zonas filtradas
         for (const zona in groups) {
             const section = document.createElement('div');
             section.className = "census-zone-card";
@@ -98,8 +101,8 @@ async function loadCensus() {
             censusContainer.appendChild(section);
         }
     } catch (e) { 
-        console.error("Error en filtro:", e);
-        censusContainer.innerHTML = "<p style='color:red;'>Error al filtrar los datos.</p>";
+        console.error("Error al cargar censo:", e);
+        censusContainer.innerHTML = "<p style='color:red;'>Error al conectar con la base de datos.</p>";
     }
 }
 
