@@ -11,7 +11,6 @@ async function loadItemSelect() {
         
         snap.forEach(doc => {
             const item = doc.data();
-            // Filtramos para no meter ingredientes básicos en el censo de máquinas
             if (item.categoria !== "Basicos") {
                 const opt = document.createElement('option');
                 opt.value = item.nombre;
@@ -20,7 +19,10 @@ async function loadItemSelect() {
                 select.appendChild(opt);
             }
         });
-    } catch (e) { console.error("Error catálogo:", e); }
+    } catch (e) { 
+        console.error("Error catálogo:", e);
+        document.getElementById('censusItem').innerHTML = '<option>Error al cargar</option>';
+    }
 }
 
 // 2. GUARDAR REGISTRO
@@ -38,14 +40,16 @@ censusForm.addEventListener('submit', async (e) => {
     try {
         await censusRef.add(data);
         censusForm.reset();
-        loadCensus(); // Recargar lista
-    } catch (e) { alert("Error al guardar"); }
+        loadCensus();
+    } catch (e) { 
+        alert("Error al guardar en Firebase"); 
+    }
 });
 
-// 3. CARGAR Y ORGANIZAR POR ZONAS
+// 3. CARGAR Y RENDERIZAR EL CENSO
 async function loadCensus() {
     const floorFilter = document.getElementById('filterFloor').value;
-    censusContainer.innerHTML = "<p>Sincronizando con Arrakis...</p>";
+    censusContainer.innerHTML = "<p style='color: #888;'>Sincronizando con Arrakis...</p>";
 
     try {
         let query = censusRef.orderBy("zona");
@@ -57,35 +61,32 @@ async function loadCensus() {
         censusContainer.innerHTML = "";
 
         if (snap.empty) {
-            censusContainer.innerHTML = "<div class='card' style='text-align:center; color:#666;'>No hay registros en esta ubicación.</div>";
+            censusContainer.innerHTML = "<div style='color:#666; padding:20px;'>No hay maquinaria registrada aquí.</div>";
             return;
         }
 
-        // Agrupamos datos por zona en memoria
         const groups = {};
         snap.forEach(doc => {
-            const item = doc.data();
-            if (!groups[item.zona]) groups[item.zona] = [];
-            groups[item.zona].push({ id: doc.id, ...item });
+            const d = doc.data();
+            if (!groups[d.zona]) groups[d.zona] = [];
+            groups[d.zona].push({ id: doc.id, ...d });
         });
 
-        // Crear una sección visual por cada zona
         for (const zona in groups) {
             const section = document.createElement('div');
             section.className = "census-zone-card";
             
-            let html = `<h3><i class="fas fa-layer-group"></i> ${zona}</h3>`;
-            
-            groups[zona].forEach(obj => {
+            let html = `<h3><i class="fas fa-th-large"></i> ZONA: ${zona}</h3>`;
+            groups[zona].forEach(item => {
                 html += `
                     <div class="census-item">
                         <div class="info">
-                            <span class="qty">${obj.cantidad}x</span>
-                            <span class="name">${obj.nombre}</span>
-                            <span class="badge-planta">${obj.planta}</span>
+                            <span class="qty">${item.cantidad}x</span>
+                            <span class="name">${item.nombre}</span>
+                            <span class="planta-tag">${item.planta}</span>
                         </div>
-                        <button class="btn-del" onclick="deleteEntry('${obj.id}')">
-                            <i class="fas fa-trash"></i>
+                        <button class="btn-del" onclick="deleteCensus('${item.id}')">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 `;
@@ -93,17 +94,20 @@ async function loadCensus() {
             section.innerHTML = html;
             censusContainer.appendChild(section);
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error(e);
+        censusContainer.innerHTML = "<p style='color:red;'>Error de conexión.</p>";
+    }
 }
 
-async function deleteEntry(id) {
-    if (confirm("¿Eliminar este registro del censo?")) {
+async function deleteCensus(id) {
+    if (confirm("¿Eliminar este registro de la base de datos?")) {
         await censusRef.doc(id).delete();
         loadCensus();
     }
 }
 
-// Inicialización
+// Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     loadItemSelect();
     loadCensus();

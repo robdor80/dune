@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +7,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
 </head>
-
 <body class="dune-dark">
     <nav class="main-nav">
         <a href="index.html">Calculadora</a>
@@ -24,65 +16,60 @@
     </nav>
 
     <main class="container">
-        <h1><i class="fas fa-warehouse"></i> Inventario de Estructuras</h1>
+        <h1 class="main-title"><i class="fas fa-microchip"></i> Control de Activos de Base</h1>
 
-        <section class="card" style="border-top: 3px solid #ff8c00;">
-            <h2><i class="fas fa-plus-circle"></i> Registrar Nueva Máquina</h2>
-            <form id="censusForm" class="census-grid">
-                <div class="form-group">
-                    <label>Ubicación (Planta):</label>
+        <section class="census-card-form">
+            <div class="card-header">
+                <h3><i class="fas fa-plus"></i> Registrar Maquinaria</h3>
+            </div>
+            <form id="censusForm" class="census-form">
+                <div class="input-group">
+                    <label><i class="fas fa-layer-group"></i> Planta</label>
                     <select id="censusFloor" required>
-                        <option value="P0">Planta 0 (Suelo)</option>
-                        <option value="P1">Planta 1</option>
-                        <option value="P2">Planta 2</option>
-                        <option value="P3">Planta 3</option>
-                        <option value="Exterior">Exterior / Techo</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Zona Táctica:</label>
-                    <select id="censusZone" required>
-                        <option value="Industria">Zona Industrial</option>
-                        <option value="Agua">Agua y Vehículos</option>
-                        <option value="Paso">Zona de Paso / Logística</option>
-                        <option value="Defensa">Defensa / Energía</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Objeto / Máquina:</label>
-                    <select id="censusItem" required>
-                        <option value="">Cargando catálogo...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Cantidad:</label>
-                    <input type="number" id="censusQty" value="1" min="1" required>
-                </div>
-                <button type="submit" class="btn-primary" style="grid-column: span 2;">
-                    <i class="fas fa-save"></i> Guardar en Censo
-                </button>
-            </form>
-        </section>
-
-        <section class="card">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2><i class="fas fa-clipboard-list"></i> Censo Actual</h2>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <label>Filtrar Planta:</label>
-                    <select id="filterFloor" onchange="loadCensus()"
-                        style="padding: 5px; background: #222; color: white; border: 1px solid #444;">
-                        <option value="all">Ver toda la Base</option>
                         <option value="P0">Planta 0</option>
                         <option value="P1">Planta 1</option>
                         <option value="P2">Planta 2</option>
                         <option value="Exterior">Exterior</option>
                     </select>
                 </div>
-            </div>
+                <div class="input-group">
+                    <label><i class="fas fa-map-marker-alt"></i> Zona</label>
+                    <select id="censusZone" required>
+                        <option value="Industria">Industria</option>
+                        <option value="Agua">Agua/Vehículos</option>
+                        <option value="Paso">Zona de Paso</option>
+                        <option value="Energia">Energía</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-cog"></i> Máquina</label>
+                    <select id="censusItem" required>
+                        <option value="">Cargando catálogo...</option>
+                    </select>
+                </div>
+                <div class="input-group qty-group">
+                    <label>Cant.</label>
+                    <input type="number" id="censusQty" value="1" min="1">
+                </div>
+                <button type="submit" class="btn-add-census">
+                    <i class="fas fa-save"></i> REGISTRAR
+                </button>
+            </form>
+        </section>
 
-            <div id="censusContainer">
+        <section class="census-display">
+            <div class="display-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: #eee;"><i class="fas fa-list-ul"></i> Censo Actual</h2>
+                <select id="filterFloor" onchange="loadCensus()" style="background: #111; color: white; border: 1px solid #444; padding: 5px; border-radius: 4px;">
+                    <option value="all">Ver Toda la Base</option>
+                    <option value="P0">Planta 0</option>
+                    <option value="P1">Planta 1</option>
+                    <option value="P2">Planta 2</option>
+                    <option value="Exterior">Exterior</option>
+                </select>
             </div>
+            <div id="censusContainer" class="zones-grid">
+                </div>
         </section>
     </main>
 
@@ -91,5 +78,4 @@
     <script src="js/db.js"></script>
     <script src="js/base.js"></script>
 </body>
-
 </html>
