@@ -4,30 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dune Awakening - Mi Base</title>
-    
+    <title>Dune Awakening - Censo de Base</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/admin.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff8c00">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA lista para Arrakis', reg))
-                    .catch(err => console.log('Error PWA', err));
-            });
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </head>
 
 <body class="dune-dark">
-
     <nav class="main-nav">
         <a href="index.html">Calculadora</a>
         <a href="base.html" class="active">Mi Base</a>
@@ -35,57 +24,70 @@
     </nav>
 
     <main class="container">
-        <h1>Estado de la Base</h1>
+        <h1><i class="fas fa-warehouse"></i> Inventario de Estructuras</h1>
 
-        <div class="base-layout">
-            <aside class="sidebar-controls">
-                <section class="card">
-                    <h2><i class="fas fa-layer-group"></i> Filtros de Mapa</h2>
-                    <div class="form-group">
-                        <label>Seleccionar Planta:</label>
-                        <select id="floorSelect">
-                            <option value="p0">Planta Baja (P0)</option>
-                            <option value="p1">Piso 1 (P1)</option>
-                            <option value="p2">Piso 2 (P2)</option>
-                        </select>
-                    </div>
-                    <div class="filter-group" style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button class="btn-secondary" style="flex: 1;" onclick="filterMap('todas')">Todas</button>
-                        <button class="btn-secondary" style="flex: 1;" onclick="filterMap('agua')">Agua</button>
-                    </div>
-                </section>
-
-                <section class="card">
-                    <h2><i class="fas fa-microchip"></i> Censo de Máquinas</h2>
-                    <div id="censusList">
-                        <p style="color: #666; font-size: 0.9rem;">Cargando inventario...</p>
-                    </div>
-                </section>
-            </aside>
-
-            <section class="map-area">
-                <div class="map-container" id="mapWrapper" style="cursor: crosshair;">
-                    <img src="https://via.placeholder.com/1000x800/111/ff8c00?text=Sube+tu+plano+en+Base.js" id="mapImage" alt="Plano de la base">
-                    <div id="markersLayer"></div>
+        <section class="card" style="border-top: 3px solid #ff8c00;">
+            <h2><i class="fas fa-plus-circle"></i> Registrar Nueva Máquina</h2>
+            <form id="censusForm" class="census-grid">
+                <div class="form-group">
+                    <label>Ubicación (Planta):</label>
+                    <select id="censusFloor" required>
+                        <option value="P0">Planta 0 (Suelo)</option>
+                        <option value="P1">Planta 1</option>
+                        <option value="P2">Planta 2</option>
+                        <option value="P3">Planta 3</option>
+                        <option value="Exterior">Exterior / Techo</option>
+                    </select>
                 </div>
-
-                <div class="card" style="margin-top: 15px; border-left-color: #00aaff;">
-                    <p style="font-size: 0.85rem; color: #aaa;">
-                        <i class="fas fa-mouse-pointer" style="color: #00aaff;"></i> 
-                        Haz clic en el plano para obtener coordenadas exactas.
-                    </p>
-                    <div id="coordDisplay" style="margin-top: 10px; display: none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;">
-                        <span style="color: #00aaff; font-family: 'Orbitron';">COORDENADAS:</span> 
-                        <strong id="currentCoords" style="margin-left: 10px; color: #fff;">X: 0%, Y: 0%</strong>
-                    </div>
+                <div class="form-group">
+                    <label>Zona Táctica:</label>
+                    <select id="censusZone" required>
+                        <option value="Industria">Zona Industrial</option>
+                        <option value="Agua">Agua y Vehículos</option>
+                        <option value="Paso">Zona de Paso / Logística</option>
+                        <option value="Defensa">Defensa / Energía</option>
+                    </select>
                 </div>
-            </section>
-        </div>
+                <div class="form-group">
+                    <label>Objeto / Máquina:</label>
+                    <select id="censusItem" required>
+                        <option value="">Cargando catálogo...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad:</label>
+                    <input type="number" id="censusQty" value="1" min="1" required>
+                </div>
+                <button type="submit" class="btn-primary" style="grid-column: span 2;">
+                    <i class="fas fa-save"></i> Guardar en Censo
+                </button>
+            </form>
+        </section>
+
+        <section class="card">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2><i class="fas fa-clipboard-list"></i> Censo Actual</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label>Filtrar Planta:</label>
+                    <select id="filterFloor" onchange="loadCensus()"
+                        style="padding: 5px; background: #222; color: white; border: 1px solid #444;">
+                        <option value="all">Ver toda la Base</option>
+                        <option value="P0">Planta 0</option>
+                        <option value="P1">Planta 1</option>
+                        <option value="P2">Planta 2</option>
+                        <option value="Exterior">Exterior</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="censusContainer">
+            </div>
+        </section>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <script src="js/db.js"></script>
     <script src="js/base.js"></script>
 </body>

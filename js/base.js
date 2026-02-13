@@ -1,89 +1,110 @@
-// --- CONFIGURACIÓN TÉCNICA PLANTA 0 (CUADRADOS PERFECTOS) ---
-const BASE_WIDTH = 10; // Cimientos de ancho
-const BASE_DEPTH = 6;  // Cimientos de fondo
+const censusForm = document.getElementById('censusForm');
+const censusContainer = document.getElementById('censusContainer');
+const censusRef = db.collection("dune_census");
 
-const mapWrapper = document.getElementById('mapWrapper');
-const markersLayer = document.getElementById('markersLayer');
-
-function initBaseMap() {
-    // La rejilla ya está definida en el CSS con background-size: 10% 16.666%
-    // Esto garantiza que cada cuadro sea un cuadrado real.
-    drawFloorPlan();
+// 1. CARGAR DESPLEGABLE CON TU CATÁLOGO REAL
+async function loadItemSelect() {
+    try {
+        const snap = await itemsRef.orderBy('nombre').get();
+        const select = document.getElementById('censusItem');
+        select.innerHTML = '<option value="">-- Selecciona Máquina --</option>';
+        
+        snap.forEach(doc => {
+            const item = doc.data();
+            // Filtramos para no meter ingredientes básicos en el censo de máquinas
+            if (item.categoria !== "Basicos") {
+                const opt = document.createElement('option');
+                opt.value = item.nombre;
+                const mk = item.version && item.version !== 'Base' ? ` [${item.version}]` : '';
+                opt.textContent = item.nombre + mk;
+                select.appendChild(opt);
+            }
+        });
+    } catch (e) { console.error("Error catálogo:", e); }
 }
 
-function drawFloorPlan() {
-    // Limpiamos elementos previos para evitar duplicados al recargar
-    const oldWalls = document.querySelectorAll('.wall-line');
-    oldWalls.forEach(el => el.remove());
-
-    // 1. PERÍMETRO EXTERIOR (Caja de 10x6)
-    // Usamos grosores de 2px o 3px para que se vean como planos técnicos
-    createWall(0, 0, 100, 2);    // Pared Norte
-    createWall(0, 99.5, 100, 2); // Pared Sur (ajustada al borde inferior)
-    createWall(0, 0, 0.5, 100);  // Pared Oeste
-    createWall(99.5, 0, 0.5, 100);// Pared Este
-
-    // 2. DIVISIONES INTERNAS (Alineadas con la rejilla)
+// 2. GUARDAR REGISTRO
+censusForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    // División Zona Industrial (Tras 4 cimientos = 40%)
-    // Ponemos 40.1% o similar para que pise justo la línea gris
-    createWall(40, 0, 0.3, 100); 
-    
-    // División Zona Paso/Agua (Tras 7 cimientos = 70%)
-    createWall(70, 0, 0.3, 100);
+    const data = {
+        planta: document.getElementById('censusFloor').value,
+        zona: document.getElementById('censusZone').value,
+        nombre: document.getElementById('censusItem').value,
+        cantidad: parseInt(document.getElementById('censusQty').value),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
 
-    // 3. INDICADOR DE PORTÓN (Opcional: Línea roja sutil en Zona Agua)
-    // Ocupa los últimos 3 cimientos del sur (del 70% al 100%)
-    const gate = document.createElement('div');
-    gate.style.position = "absolute";
-    gate.style.backgroundColor = "#ff4444";
-    gate.style.left = "70%";
-    gate.style.bottom = "0";
-    gate.style.width = "30%";
-    gate.style.height = "4px";
-    gate.style.boxShadow = "0 0 10px #ff4444";
-    gate.style.zIndex = "3";
-    mapWrapper.appendChild(gate);
-}
-
-// Función auxiliar para crear paredes con precisión
-function createWall(left, top, width, height) {
-    const wall = document.createElement('div');
-    wall.className = 'wall-line';
-    wall.style.left = left + "%";
-    wall.style.top = top + "%";
-    // Si el ancho es pequeño (ej. 0.5), le damos píxeles fijos para que no desaparezca
-    wall.style.width = (width < 1) ? "3px" : width + "%";
-    wall.style.height = (height < 1) ? "3px" : height + "%";
-    mapWrapper.appendChild(wall);
-}
-
-// 4. CAPTURA DE CLICS PARA COORDENADAS
-mapWrapper.addEventListener('click', (e) => {
-    const rect = mapWrapper.getBoundingClientRect();
-    
-    // Calculamos el porcentaje relativo al contenedor
-    const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
-    const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
-
-    const display = document.getElementById('coordDisplay');
-    if (display) {
-        display.style.display = 'block';
-        display.innerHTML = `<strong>COORDENADAS:</strong> X: ${x}%, Y: ${y}%`;
-    }
-
-    placeMarker(x, y);
+    try {
+        await censusRef.add(data);
+        censusForm.reset();
+        loadCensus(); // Recargar lista
+    } catch (e) { alert("Error al guardar"); }
 });
 
-function placeMarker(x, y) {
-    let marker = document.querySelector('.temp-marker');
-    if (!marker) {
-        marker = document.createElement('div');
-        marker.className = 'map-marker temp-marker';
-        markersLayer.appendChild(marker);
-    }
-    marker.style.left = x + '%';
-    marker.style.top = y + '%';
+// 3. CARGAR Y ORGANIZAR POR ZONAS
+async function loadCensus() {
+    const floorFilter = document.getElementById('filterFloor').value;
+    censusContainer.innerHTML = "<p>Sincronizando con Arrakis...</p>";
+
+    try {
+        let query = censusRef.orderBy("zona");
+        if (floorFilter !== "all") {
+            query = query.where("planta", "==", floorFilter);
+        }
+
+        const snap = await query.get();
+        censusContainer.innerHTML = "";
+
+        if (snap.empty) {
+            censusContainer.innerHTML = "<div class='card' style='text-align:center; color:#666;'>No hay registros en esta ubicación.</div>";
+            return;
+        }
+
+        // Agrupamos datos por zona en memoria
+        const groups = {};
+        snap.forEach(doc => {
+            const item = doc.data();
+            if (!groups[item.zona]) groups[item.zona] = [];
+            groups[item.zona].push({ id: doc.id, ...item });
+        });
+
+        // Crear una sección visual por cada zona
+        for (const zona in groups) {
+            const section = document.createElement('div');
+            section.className = "census-zone-card";
+            
+            let html = `<h3><i class="fas fa-layer-group"></i> ${zona}</h3>`;
+            
+            groups[zona].forEach(obj => {
+                html += `
+                    <div class="census-item">
+                        <div class="info">
+                            <span class="qty">${obj.cantidad}x</span>
+                            <span class="name">${obj.nombre}</span>
+                            <span class="badge-planta">${obj.planta}</span>
+                        </div>
+                        <button class="btn-del" onclick="deleteEntry('${obj.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            section.innerHTML = html;
+            censusContainer.appendChild(section);
+        }
+    } catch (e) { console.error(e); }
 }
 
-window.onload = initBaseMap;
+async function deleteEntry(id) {
+    if (confirm("¿Eliminar este registro del censo?")) {
+        await censusRef.doc(id).delete();
+        loadCensus();
+    }
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', () => {
+    loadItemSelect();
+    loadCensus();
+});
