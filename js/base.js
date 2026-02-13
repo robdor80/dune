@@ -1,72 +1,75 @@
-// --- CONFIGURACIÓN TÉCNICA DE LA PLANTA 0 ---
-const BASE_WIDTH = 10; // Cimientos de ancho
-const BASE_DEPTH = 6;  // Cimientos de fondo
-
 const mapWrapper = document.getElementById('mapWrapper');
 const markersLayer = document.getElementById('markersLayer');
 
-function setupBaseMap() {
-    // 1. Fondo Azul Técnico y Rejilla de Cimientos
-    mapWrapper.style.backgroundColor = "#001a33";
-    
-    // Calculamos el tamaño de la rejilla basado en el ancho total (10 cimientos)
-    // Esto hace que la rejilla coincida perfectamente con tus piezas del juego
-    const gridSpacing = (100 / BASE_WIDTH) + "%";
-    const gridSpacingY = (100 / BASE_DEPTH) + "%";
-
+function initBaseMap() {
+    // 1. Crear la rejilla de cimientos (10 ancho x 6 fondo)
     mapWrapper.style.backgroundImage = `
-        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
     `;
-    mapWrapper.style.backgroundSize = `${100 / BASE_WIDTH}% ${100 / BASE_DEPTH}%`;
+    // Cada cuadro es el 10% del ancho (10 cimientos) y 16.6% del alto (6 cimientos)
+    mapWrapper.style.backgroundSize = "10% 16.66%";
 
-    // 2. Dibujamos las Paredes (Silueta Blanca)
-    drawWalls();
+    drawFloorPlan();
 }
 
-function drawWalls() {
-    // Limpiamos capa de dibujo si existiera
-    const drawingLayer = document.getElementById('mapImage');
-    drawingLayer.style.position = "absolute";
-    drawingLayer.style.width = "100%";
-    drawingLayer.style.height = "100%";
-    drawingLayer.style.border = "4px solid white"; // Perímetro exterior total
+function drawFloorPlan() {
+    // Limpiamos por si acaso
+    const existingWalls = document.querySelectorAll('.wall-line');
+    existingWalls.forEach(w => w.remove());
+
+    // PAREDES EXTERIORES (El rectángulo de 10x6)
+    createWall(0, 0, 100, 2);   // Norte
+    createWall(0, 98, 100, 2);  // Sur
+    createWall(0, 0, 1, 100);   // Oeste
+    createWall(99, 0, 1, 100);  // Este
+
+    // DIVISIONES INTERNAS (Según tu dibujo)
+    // Pared entre Industria (4) y Paso (3) -> Al 40%
+    createWall(40, 0, 1, 100); 
     
-    // Añadimos las divisiones internas (Paredes de las zonas)
-    // Pared derecha de Zona Industrial (a los 4 cimientos)
-    const wall1 = createWall(40, 0, 1, 100); 
-    // Pared izquierda de Zona Agua (a los 7 cimientos: 4+3)
-    const wall2 = createWall(70, 0, 1, 100);
-    
-    mapWrapper.appendChild(wall1);
-    mapWrapper.appendChild(wall2);
+    // Pared entre Paso (3) y Agua (3) -> Al 70% (4+3)
+    createWall(70, 0, 1, 100);
+
+    // MARCAR LAS PUERTAS (Puntos rojos)
+    createDoor(40, 50); // Puerta Industria
+    createDoor(70, 30); // Puerta Agua
+    createDoor(85, 98, true); // Portón vehículos (al sur)
 }
 
 function createWall(left, top, width, height) {
     const wall = document.createElement('div');
-    wall.style.position = "absolute";
-    wall.style.backgroundColor = "white";
+    wall.className = 'wall-line';
     wall.style.left = left + "%";
     wall.style.top = top + "%";
     wall.style.width = width === 1 ? "3px" : width + "%";
-    wall.style.height = height === 1 ? "3px" : height + "%";
-    wall.style.boxShadow = "0 0 10px rgba(255,255,255,0.5)";
-    return wall;
+    wall.style.height = height === 2 ? "3px" : height + "%";
+    mapWrapper.appendChild(wall);
 }
 
-// 3. Captura de clics para colocar máquinas
+function createDoor(x, y, isLarge = false) {
+    const door = document.createElement('div');
+    door.style.position = "absolute";
+    door.style.backgroundColor = "#ff4444";
+    door.style.left = x + "%";
+    door.style.top = y + "%";
+    door.style.width = isLarge ? "15%" : "10px";
+    door.style.height = isLarge ? "5px" : "15px";
+    door.style.transform = "translate(-50%, -50%)";
+    door.style.boxShadow = "0 0 10px #ff4444";
+    door.style.zIndex = "4";
+    mapWrapper.appendChild(door);
+}
+
+// Captura de clics
 mapWrapper.addEventListener('click', (e) => {
     const rect = mapWrapper.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
     const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
 
     document.getElementById('coordDisplay').style.display = 'block';
-    document.getElementById('currentCoords').innerText = `Punto de anclaje -> X: ${x}%, Y: ${y}%`;
+    document.getElementById('currentCoords').innerText = `X: ${x}%, Y: ${y}%`;
 
-    placeMarker(x, y);
-});
-
-function placeMarker(x, y) {
     let marker = document.querySelector('.temp-marker');
     if (!marker) {
         marker = document.createElement('div');
@@ -75,6 +78,6 @@ function placeMarker(x, y) {
     }
     marker.style.left = x + '%';
     marker.style.top = y + '%';
-}
+});
 
-window.onload = setupBaseMap;
+window.onload = initBaseMap;
