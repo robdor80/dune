@@ -1,19 +1,18 @@
-/* --- ESTILO DEL MAPA TÁCTICO DUNE --- */
-
+/* --- CONTENEDOR PRINCIPAL DEL MAPA --- */
 .map-container {
     position: relative;
     width: 100%;
-    /* Obligamos al contenedor a tener la proporción de tu base (10 de ancho / 6 de fondo) */
+    /* Mantiene la proporción 10:6 de tus cimientos */
     aspect-ratio: 10 / 6; 
     overflow: hidden;
     border: 2px solid #ff8c00;
-    background-color: #001a33; /* Azul oscuro técnico */
+    background-color: #000c1a; /* Azul muy oscuro de fondo */
     border-radius: 8px;
     cursor: crosshair;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
 }
 
-/* Capa para los marcadores y elementos de dibujo */
+/* --- CAPA DE ELEMENTOS Y PINS --- */
 #markersLayer {
     position: absolute;
     top: 0;
@@ -21,59 +20,82 @@
     width: 100%;
     height: 100%;
     z-index: 5;
-    pointer-events: none; /* Permite que el clic llegue al contenedor para capturar coordenadas */
+    pointer-events: none; /* Deja pasar los clics al fondo para capturar coordenadas */
 }
 
-/* Estilo para las líneas de las paredes */
+/* --- LÍNEAS TÉCNICAS DEL PLANO (PAREDES) --- */
 .wall-line {
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 8px #fff;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     z-index: 2;
+    pointer-events: none;
 }
 
-/* Marcador temporal y Pins */
+/* --- MARCADORES (PINS DE MÁQUINAS Y TEMP) --- */
 .map-marker, .marker {
     position: absolute;
-    width: 25px;
-    height: 25px;
-    background: rgba(0, 170, 255, 0.8);
+    width: 20px;
+    height: 20px;
+    background: #ff8c00; /* Naranja contrastado */
     border: 2px solid #fff;
     border-radius: 50%;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    box-shadow: 0 0 15px #00aaff;
+    box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
     z-index: 10;
-    pointer-events: auto; /* Para poder interactuar con ellos */
-    transition: transform 0.2s;
+    pointer-events: auto;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.map-marker:hover {
-    transform: translate(-50%, -50%) scale(1.2);
+.map-marker:hover, .marker:hover {
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 20px #00aaff;
+    border-color: #00aaff;
 }
 
-/* --- MEDIA QUERIES (Layout) --- */
+/* --- LAYOUT Y RESPONSIVE --- */
+.base-layout {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
+}
 
+/* PC: Controles a la izquierda, Mapa a la derecha */
+@media (min-width: 1025px) {
+    .base-layout {
+        grid-template-columns: 320px 1fr;
+        align-items: start;
+    }
+}
+
+/* Móvil/Tablet: Mapa arriba, Controles abajo */
 @media (max-width: 1024px) {
     .base-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+        grid-template-columns: 1fr;
     }
     .sidebar-controls {
-        order: 2; /* Mapa arriba, controles abajo */
-        width: 100%;
+        order: 2;
     }
     .map-area {
         order: 1;
     }
 }
 
-@media (min-width: 1025px) {
-    .base-layout {
-        display: grid;
-        grid-template-columns: 320px 1fr;
-        gap: 25px;
-        align-items: start;
-    }
+/* Estilos de las tarjetas de control */
+.sidebar-controls .card {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+#coordDisplay {
+    background: rgba(0, 170, 255, 0.1);
+    border-left: 4px solid #00aaff;
+    padding: 10px;
+    margin-top: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
 }

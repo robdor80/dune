@@ -1,67 +1,77 @@
+// --- CONFIGURACIÓN TÉCNICA PLANTA 0 (MODO SANDBOX) ---
+const BASE_WIDTH = 10;
+const BASE_DEPTH = 6;
+const MARGIN = 5; // 5% de margen a cada lado (total 90% de tamaño)
+
 const mapWrapper = document.getElementById('mapWrapper');
 const markersLayer = document.getElementById('markersLayer');
 
 function initBaseMap() {
-    // 1. Crear la rejilla de cimientos (10 ancho x 6 fondo)
+    // Rejilla infinita de fondo (líneas grises finas)
+    mapWrapper.style.backgroundColor = "#001a33";
     mapWrapper.style.backgroundImage = `
-        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
     `;
-    // Cada cuadro es el 10% del ancho (10 cimientos) y 16.6% del alto (6 cimientos)
-    mapWrapper.style.backgroundSize = "10% 16.66%";
+    mapWrapper.style.backgroundSize = "5% 5%"; // Rejilla decorativa global
 
     drawFloorPlan();
 }
 
 function drawFloorPlan() {
-    // Limpiamos por si acaso
-    const existingWalls = document.querySelectorAll('.wall-line');
-    existingWalls.forEach(w => w.remove());
+    // Limpiamos elementos previos
+    const oldElements = document.querySelectorAll('.wall-line, .door-line');
+    oldElements.forEach(el => el.remove());
 
-    // PAREDES EXTERIORES (El rectángulo de 10x6)
-    createWall(0, 0, 100, 2);   // Norte
-    createWall(0, 98, 100, 2);  // Sur
-    createWall(0, 0, 1, 100);   // Oeste
-    createWall(99, 0, 1, 100);  // Este
+    // 1. PERÍMETRO DE LA BASE (al 90% del contenedor)
+    // Creamos un contenedor visual para la base
+    const baseArea = document.createElement('div');
+    baseArea.className = 'wall-line';
+    baseArea.style.left = MARGIN + "%";
+    baseArea.style.top = MARGIN + "%";
+    baseArea.style.width = (100 - (MARGIN * 2)) + "%";
+    baseArea.style.height = (100 - (MARGIN * 2)) + "%";
+    baseArea.style.border = "3px solid white";
+    baseArea.style.backgroundColor = "rgba(255,255,255,0.02)";
+    baseArea.style.pointerEvents = "none";
+    mapWrapper.appendChild(baseArea);
 
-    // DIVISIONES INTERNAS (Según tu dibujo)
-    // Pared entre Industria (4) y Paso (3) -> Al 40%
-    createWall(40, 0, 1, 100); 
+    // 2. DIVISIONES INTERNAS (Calculadas sobre el 90%)
+    const innerWidth = 100 - (MARGIN * 2);
     
-    // Pared entre Paso (3) y Agua (3) -> Al 70% (4+3)
-    createWall(70, 0, 1, 100);
+    // Pared Industria/Paso (a los 4 de 10 cimientos)
+    const wall1Pos = MARGIN + (innerWidth * 0.4);
+    createWallLine(wall1Pos, MARGIN, 2, 100 - (MARGIN * 2));
+    
+    // Pared Paso/Agua (a los 7 de 10 cimientos)
+    const wall2Pos = MARGIN + (innerWidth * 0.7);
+    createWallLine(wall2Pos, MARGIN, 2, 100 - (MARGIN * 2));
 
-    // MARCAR LAS PUERTAS (Puntos rojos)
-    createDoor(40, 50); // Puerta Industria
-    createDoor(70, 30); // Puerta Agua
-    createDoor(85, 98, true); // Portón vehículos (al sur)
+    // 3. INDICADOR PORTÓN VEHÍCULOS (Línea roja gruesa en el borde sur)
+    const gateWidth = innerWidth * 0.3; // 3 cimientos de ancho
+    const gatePos = MARGIN + (innerWidth * 0.7);
+    const gate = document.createElement('div');
+    gate.style.position = "absolute";
+    gate.style.backgroundColor = "#ff4444";
+    gate.style.left = gatePos + "%";
+    gate.style.top = (100 - MARGIN - 1) + "%";
+    gate.style.width = gateWidth + "%";
+    gate.style.height = "5px";
+    gate.style.boxShadow = "0 0 10px #ff4444";
+    mapWrapper.appendChild(gate);
 }
 
-function createWall(left, top, width, height) {
+function createWallLine(left, top, widthPx, heightPct) {
     const wall = document.createElement('div');
     wall.className = 'wall-line';
     wall.style.left = left + "%";
     wall.style.top = top + "%";
-    wall.style.width = width === 1 ? "3px" : width + "%";
-    wall.style.height = height === 2 ? "3px" : height + "%";
+    wall.style.width = widthPx + "px";
+    wall.style.height = heightPct + "%";
     mapWrapper.appendChild(wall);
 }
 
-function createDoor(x, y, isLarge = false) {
-    const door = document.createElement('div');
-    door.style.position = "absolute";
-    door.style.backgroundColor = "#ff4444";
-    door.style.left = x + "%";
-    door.style.top = y + "%";
-    door.style.width = isLarge ? "15%" : "10px";
-    door.style.height = isLarge ? "5px" : "15px";
-    door.style.transform = "translate(-50%, -50%)";
-    door.style.boxShadow = "0 0 10px #ff4444";
-    door.style.zIndex = "4";
-    mapWrapper.appendChild(door);
-}
-
-// Captura de clics
+// Capturador de clics (mantiene la lógica de coordenadas globales)
 mapWrapper.addEventListener('click', (e) => {
     const rect = mapWrapper.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
@@ -70,6 +80,10 @@ mapWrapper.addEventListener('click', (e) => {
     document.getElementById('coordDisplay').style.display = 'block';
     document.getElementById('currentCoords').innerText = `X: ${x}%, Y: ${y}%`;
 
+    placeMarker(x, y);
+});
+
+function placeMarker(x, y) {
     let marker = document.querySelector('.temp-marker');
     if (!marker) {
         marker = document.createElement('div');
@@ -78,6 +92,6 @@ mapWrapper.addEventListener('click', (e) => {
     }
     marker.style.left = x + '%';
     marker.style.top = y + '%';
-});
+}
 
 window.onload = initBaseMap;
