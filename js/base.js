@@ -1,8 +1,9 @@
 const censusForm = document.getElementById('censusForm');
 const censusContainer = document.getElementById('censusContainer');
 const censusRef = db.collection("dune_census");
+let itemImages = {}; // Guardaremos las URLs aquí
 
-// 1. CARGAR DESPLEGABLE CON TU CATÁLOGO REAL
+// 1. CARGAR CATÁLOGO Y MAPEAR IMÁGENES
 async function loadItemSelect() {
     try {
         const snap = await itemsRef.orderBy('nombre').get();
@@ -11,6 +12,11 @@ async function loadItemSelect() {
         
         snap.forEach(doc => {
             const item = doc.data();
+            // Guardamos la imagen asociada al nombre para usarla luego
+            if (item.imagen) {
+                itemImages[item.nombre] = item.imagen;
+            }
+
             if (item.categoria !== "Basicos") {
                 const opt = document.createElement('option');
                 opt.value = item.nombre;
@@ -19,9 +25,10 @@ async function loadItemSelect() {
                 select.appendChild(opt);
             }
         });
+        // Una vez cargadas las imágenes, cargamos el censo
+        loadCensus();
     } catch (e) { 
         console.error("Error catálogo:", e);
-        document.getElementById('censusItem').innerHTML = '<option>Error al cargar</option>';
     }
 }
 
@@ -42,14 +49,14 @@ censusForm.addEventListener('submit', async (e) => {
         censusForm.reset();
         loadCensus();
     } catch (e) { 
-        alert("Error al guardar en Firebase"); 
+        alert("Error al guardar"); 
     }
 });
 
-// 3. CARGAR Y RENDERIZAR EL CENSO
+// 3. CARGAR Y RENDERIZAR
 async function loadCensus() {
     const floorFilter = document.getElementById('filterFloor').value;
-    censusContainer.innerHTML = "<p style='color: #888;'>Sincronizando con Arrakis...</p>";
+    censusContainer.innerHTML = "<p style='color: #888;'>Sincronizando...</p>";
 
     try {
         let query = censusRef.orderBy("zona");
@@ -59,11 +66,6 @@ async function loadCensus() {
 
         const snap = await query.get();
         censusContainer.innerHTML = "";
-
-        if (snap.empty) {
-            censusContainer.innerHTML = "<div style='color:#666; padding:20px;'>No hay maquinaria registrada aquí.</div>";
-            return;
-        }
 
         const groups = {};
         snap.forEach(doc => {
@@ -78,9 +80,13 @@ async function loadCensus() {
             
             let html = `<h3><i class="fas fa-th-large"></i> ZONA: ${zona}</h3>`;
             groups[zona].forEach(item => {
+                // Buscamos si tenemos imagen para este objeto, si no, una por defecto
+                const imgUrl = itemImages[item.nombre] || 'https://via.placeholder.com/40?text=?';
+                
                 html += `
                     <div class="census-item">
                         <div class="info">
+                            <img src="${imgUrl}" class="census-img" alt="${item.nombre}">
                             <span class="qty">${item.cantidad}x</span>
                             <span class="name">${item.nombre}</span>
                             <span class="planta-tag">${item.planta}</span>
@@ -94,21 +100,16 @@ async function loadCensus() {
             section.innerHTML = html;
             censusContainer.appendChild(section);
         }
-    } catch (e) { 
-        console.error(e);
-        censusContainer.innerHTML = "<p style='color:red;'>Error de conexión.</p>";
-    }
+    } catch (e) { console.error(e); }
 }
 
 async function deleteCensus(id) {
-    if (confirm("¿Eliminar este registro de la base de datos?")) {
+    if (confirm("¿Eliminar registro?")) {
         await censusRef.doc(id).delete();
         loadCensus();
     }
 }
 
-// Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     loadItemSelect();
-    loadCensus();
 });
