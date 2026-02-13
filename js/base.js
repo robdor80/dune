@@ -1,84 +1,76 @@
-// --- CONFIGURACIÓN TÉCNICA PLANTA 0 (MODO SANDBOX) ---
-const BASE_WIDTH = 10;
-const BASE_DEPTH = 6;
-const MARGIN = 5; // 5% de margen a cada lado (total 90% de tamaño)
+// --- CONFIGURACIÓN TÉCNICA PLANTA 0 (CUADRADOS PERFECTOS) ---
+const BASE_WIDTH = 10; // Cimientos de ancho
+const BASE_DEPTH = 6;  // Cimientos de fondo
 
 const mapWrapper = document.getElementById('mapWrapper');
 const markersLayer = document.getElementById('markersLayer');
 
 function initBaseMap() {
-    // Rejilla infinita de fondo (líneas grises finas)
-    mapWrapper.style.backgroundColor = "#001a33";
-    mapWrapper.style.backgroundImage = `
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
-    `;
-    mapWrapper.style.backgroundSize = "5% 5%"; // Rejilla decorativa global
-
+    // La rejilla ya está definida en el CSS con background-size: 10% 16.666%
+    // Esto garantiza que cada cuadro sea un cuadrado real.
     drawFloorPlan();
 }
 
 function drawFloorPlan() {
-    // Limpiamos elementos previos
-    const oldElements = document.querySelectorAll('.wall-line, .door-line');
-    oldElements.forEach(el => el.remove());
+    // Limpiamos elementos previos para evitar duplicados al recargar
+    const oldWalls = document.querySelectorAll('.wall-line');
+    oldWalls.forEach(el => el.remove());
 
-    // 1. PERÍMETRO DE LA BASE (al 90% del contenedor)
-    // Creamos un contenedor visual para la base
-    const baseArea = document.createElement('div');
-    baseArea.className = 'wall-line';
-    baseArea.style.left = MARGIN + "%";
-    baseArea.style.top = MARGIN + "%";
-    baseArea.style.width = (100 - (MARGIN * 2)) + "%";
-    baseArea.style.height = (100 - (MARGIN * 2)) + "%";
-    baseArea.style.border = "3px solid white";
-    baseArea.style.backgroundColor = "rgba(255,255,255,0.02)";
-    baseArea.style.pointerEvents = "none";
-    mapWrapper.appendChild(baseArea);
+    // 1. PERÍMETRO EXTERIOR (Caja de 10x6)
+    // Usamos grosores de 2px o 3px para que se vean como planos técnicos
+    createWall(0, 0, 100, 2);    // Pared Norte
+    createWall(0, 99.5, 100, 2); // Pared Sur (ajustada al borde inferior)
+    createWall(0, 0, 0.5, 100);  // Pared Oeste
+    createWall(99.5, 0, 0.5, 100);// Pared Este
 
-    // 2. DIVISIONES INTERNAS (Calculadas sobre el 90%)
-    const innerWidth = 100 - (MARGIN * 2);
+    // 2. DIVISIONES INTERNAS (Alineadas con la rejilla)
     
-    // Pared Industria/Paso (a los 4 de 10 cimientos)
-    const wall1Pos = MARGIN + (innerWidth * 0.4);
-    createWallLine(wall1Pos, MARGIN, 2, 100 - (MARGIN * 2));
+    // División Zona Industrial (Tras 4 cimientos = 40%)
+    // Ponemos 40.1% o similar para que pise justo la línea gris
+    createWall(40, 0, 0.3, 100); 
     
-    // Pared Paso/Agua (a los 7 de 10 cimientos)
-    const wall2Pos = MARGIN + (innerWidth * 0.7);
-    createWallLine(wall2Pos, MARGIN, 2, 100 - (MARGIN * 2));
+    // División Zona Paso/Agua (Tras 7 cimientos = 70%)
+    createWall(70, 0, 0.3, 100);
 
-    // 3. INDICADOR PORTÓN VEHÍCULOS (Línea roja gruesa en el borde sur)
-    const gateWidth = innerWidth * 0.3; // 3 cimientos de ancho
-    const gatePos = MARGIN + (innerWidth * 0.7);
+    // 3. INDICADOR DE PORTÓN (Opcional: Línea roja sutil en Zona Agua)
+    // Ocupa los últimos 3 cimientos del sur (del 70% al 100%)
     const gate = document.createElement('div');
     gate.style.position = "absolute";
     gate.style.backgroundColor = "#ff4444";
-    gate.style.left = gatePos + "%";
-    gate.style.top = (100 - MARGIN - 1) + "%";
-    gate.style.width = gateWidth + "%";
-    gate.style.height = "5px";
+    gate.style.left = "70%";
+    gate.style.bottom = "0";
+    gate.style.width = "30%";
+    gate.style.height = "4px";
     gate.style.boxShadow = "0 0 10px #ff4444";
+    gate.style.zIndex = "3";
     mapWrapper.appendChild(gate);
 }
 
-function createWallLine(left, top, widthPx, heightPct) {
+// Función auxiliar para crear paredes con precisión
+function createWall(left, top, width, height) {
     const wall = document.createElement('div');
     wall.className = 'wall-line';
     wall.style.left = left + "%";
     wall.style.top = top + "%";
-    wall.style.width = widthPx + "px";
-    wall.style.height = heightPct + "%";
+    // Si el ancho es pequeño (ej. 0.5), le damos píxeles fijos para que no desaparezca
+    wall.style.width = (width < 1) ? "3px" : width + "%";
+    wall.style.height = (height < 1) ? "3px" : height + "%";
     mapWrapper.appendChild(wall);
 }
 
-// Capturador de clics (mantiene la lógica de coordenadas globales)
+// 4. CAPTURA DE CLICS PARA COORDENADAS
 mapWrapper.addEventListener('click', (e) => {
     const rect = mapWrapper.getBoundingClientRect();
+    
+    // Calculamos el porcentaje relativo al contenedor
     const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
     const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
 
-    document.getElementById('coordDisplay').style.display = 'block';
-    document.getElementById('currentCoords').innerText = `X: ${x}%, Y: ${y}%`;
+    const display = document.getElementById('coordDisplay');
+    if (display) {
+        display.style.display = 'block';
+        display.innerHTML = `<strong>COORDENADAS:</strong> X: ${x}%, Y: ${y}%`;
+    }
 
     placeMarker(x, y);
 });

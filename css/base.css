@@ -1,18 +1,24 @@
-/* --- CONTENEDOR PRINCIPAL DEL MAPA --- */
+/* --- CONTENEDOR DEL MAPA (PROPORCIÓN REAL) --- */
 .map-container {
     position: relative;
     width: 100%;
-    /* Mantiene la proporción 10:6 de tus cimientos */
+    /* Proporción 10:6 para que los cimientos sean cuadrados */
     aspect-ratio: 10 / 6; 
-    overflow: hidden;
+    background-color: #000c1a;
     border: 2px solid #ff8c00;
-    background-color: #000c1a; /* Azul muy oscuro de fondo */
     border-radius: 8px;
+    overflow: hidden;
     cursor: crosshair;
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+    
+    /* Rejilla técnica: 10 columnas (10%) y 6 filas (16.666%) */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 10% 16.666%;
 }
 
-/* --- CAPA DE ELEMENTOS Y PINS --- */
+/* --- CAPA DE ELEMENTOS --- */
 #markersLayer {
     position: absolute;
     top: 0;
@@ -20,48 +26,46 @@
     width: 100%;
     height: 100%;
     z-index: 5;
-    pointer-events: none; /* Deja pasar los clics al fondo para capturar coordenadas */
-}
-
-/* --- LÍNEAS TÉCNICAS DEL PLANO (PAREDES) --- */
-.wall-line {
-    position: absolute;
-    background-color: #ffffff;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    z-index: 2;
     pointer-events: none;
 }
 
-/* --- MARCADORES (PINS DE MÁQUINAS Y TEMP) --- */
+/* --- PAREDES BLANCAS (Ajustadas a la rejilla) --- */
+.wall-line {
+    position: absolute;
+    background-color: #ffffff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    z-index: 2;
+}
+
+/* --- MARCADORES (PINS) --- */
 .map-marker, .marker {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    background: #ff8c00; /* Naranja contrastado */
+    width: 22px;
+    height: 22px;
+    background: #ff8c00;
     border: 2px solid #fff;
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(255, 140, 0, 0.7);
+    box-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
     z-index: 10;
     pointer-events: auto;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
 }
 
-.map-marker:hover, .marker:hover {
+.map-marker:hover {
     transform: translate(-50%, -50%) scale(1.3);
+    background: #00aaff;
     box-shadow: 0 0 20px #00aaff;
-    border-color: #00aaff;
 }
 
-/* --- LAYOUT Y RESPONSIVE --- */
+/* --- LAYOUT ESTRUCTURAL --- */
 .base-layout {
     display: grid;
-    gap: 20px;
+    gap: 25px;
     margin-top: 20px;
 }
 
-/* PC: Controles a la izquierda, Mapa a la derecha */
+/* PC: 320px para filtros/censo y el resto para el mapa */
 @media (min-width: 1025px) {
     .base-layout {
         grid-template-columns: 320px 1fr;
@@ -69,33 +73,51 @@
     }
 }
 
-/* Móvil/Tablet: Mapa arriba, Controles abajo */
+/* MÓVIL: Mapa arriba, Censo abajo */
 @media (max-width: 1024px) {
     .base-layout {
         grid-template-columns: 1fr;
     }
-    .sidebar-controls {
-        order: 2;
-    }
-    .map-area {
-        order: 1;
-    }
+    .map-area { order: 1; }
+    .sidebar-controls { order: 2; }
 }
 
-/* Estilos de las tarjetas de control */
-.sidebar-controls .card {
-    margin-bottom: 15px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
+/* --- TARJETAS DEL CENSO (EL LISTADO) --- */
+.card {
+    background: rgba(10, 10, 10, 0.8);
     border: 1px solid #333;
-    border-radius: 8px;
+    border-left: 3px solid #ff8c00;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
 }
 
+.machine-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #222;
+}
+
+.machine-item:last-child { border: 0; }
+
+.zone-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    background: #333;
+    color: #ff8c00;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+/* Coordenadas en tiempo real */
 #coordDisplay {
-    background: rgba(0, 170, 255, 0.1);
-    border-left: 4px solid #00aaff;
-    padding: 10px;
-    margin-top: 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px dashed #00aaff;
+    color: #00aaff;
+    padding: 12px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    border-radius: 4px;
 }
