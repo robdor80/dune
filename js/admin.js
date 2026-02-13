@@ -1,27 +1,30 @@
-// Variable para saber si estamos editando
 let editId = null;
+let localItems = [];
 
-// --- Lógica de la Interfaz del Formulario ---
-
-function addIngredientRow(nombre = "", cantidad = "") {
+// Función para añadir fila de ingrediente con DESPLEGABLE
+function addIngredientRow(selectedName = "", qty = "") {
     const container = document.getElementById('ingredientsList');
     const div = document.createElement('div');
     div.className = 'ingredient-row';
+    
+    // Creamos las opciones basadas en lo que ya hay en la base de datos
+    let options = localItems.map(item => 
+        `<option value="${item.nombre}" ${item.nombre === selectedName ? 'selected' : ''}>${item.nombre} (${item.version || 'Base'})</option>`
+    ).join('');
+
     div.innerHTML = `
-        <input type="text" class="ing-name" placeholder="Nombre ingrediente" value="${nombre}" required>
-        <input type="number" class="ing-qty" placeholder="Cant." min="0.1" step="0.1" value="${cantidad}" required>
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
-        </button>
+        <select class="ing-name" required>
+            <option value="">-- Seleccionar --</option>
+            ${options}
+        </select>
+        <input type="number" class="ing-qty" placeholder="Cant." step="0.1" value="${qty}" required>
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
     `;
     container.appendChild(div);
 }
 
-// --- Operaciones con Firebase ---
-
 document.getElementById('itemForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const isRaw = document.getElementById('isRaw').value === 'yes';
     const ingredients = [];
     
@@ -36,124 +39,82 @@ document.getElementById('itemForm').addEventListener('submit', async (e) => {
 
     const itemData = {
         nombre: document.getElementById('itemName').value,
+        version: document.getElementById('itemVersion').value,
         imagen: document.getElementById('itemImg').value || "https://via.placeholder.com/80?text=DUNE",
         categoria: document.getElementById('itemCategory').value,
         esMateriaPrima: isRaw,
         rendimiento: isRaw ? 1 : parseFloat(document.getElementById('yield').value),
         estacion: isRaw ? "" : document.getElementById('station').value,
         receta: ingredients,
-        fechaModificacion: firebase.firestore.FieldValue.serverTimestamp()
+        fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
         if (editId) {
-            // ACTUALIZAR
             await itemsRef.doc(editId).update(itemData);
-            alert("¡Objeto actualizado en el Destiltraje!");
             editId = null;
-            document.querySelector('.btn-primary').innerText = "Guardar Objeto en la Especia";
         } else {
-            // CREAR NUEVO
-            itemData.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
             await itemsRef.add(itemData);
-            alert("¡Objeto guardado en la Especia!");
         }
-        
-        document.getElementById('itemForm').reset();
-        document.getElementById('ingredientsList').innerHTML = "";
-        document.getElementById('recipeSection').style.display = 'block'; // reset view
-        loadCatalog(); 
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Error al conectar con Arrakis");
-    }
+        alert("Sincronizado correctamente");
+        location.reload(); // Recargamos para actualizar listas
+    } catch (error) { alert("Error en Arrakis"); }
 });
 
-// Cargar catálogo con botones de acción
 async function loadCatalog() {
+    const snap = await itemsRef.orderBy('nombre').get();
+    localItems = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderCatalog(localItems);
+}
+
+function renderCatalog(items) {
     const catalogDiv = document.getElementById('itemsCatalog');
-    catalogDiv.innerHTML = "<p>Sincronizando con la base...</p>";
-
-    try {
-        const snapshot = await itemsRef.orderBy('fechaCreacion', 'desc').get();
-        catalogDiv.innerHTML = "";
-
-        snapshot.forEach(doc => {
-            const item = doc.data();
-            const id = doc.id;
-            const badge = document.createElement('div');
-            badge.className = 'item-badge';
-            badge.innerHTML = `
-                <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
-                    <img src="${item.imagen}" style="width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #ff8c00;">
-                    <div style="flex:1;">
-                        <h4 style="margin:0;">${item.nombre}</h4>
-                        <small style="color:#aaa;">${item.categoria} | ${item.esMateriaPrima ? '🌿 Recolectable' : '⚙️ Fabricado'}</small>
-                    </div>
+    catalogDiv.innerHTML = "";
+    items.forEach(item => {
+        const badge = document.createElement('div');
+        badge.className = 'item-badge';
+        badge.dataset.category = item.categoria;
+        badge.dataset.name = item.nombre.toLowerCase();
+        badge.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${item.imagen}" style="width:40px; height:40px; border-radius:5px;">
+                <div>
+                    <h4 style="margin:0">${item.nombre} <span style="color:#00aaff">${item.version || ''}</span></h4>
+                    <small>${item.categoria}</small>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-secondary" onclick="editItem('${id}')" style="flex:1; padding:5px; font-size:0.8rem;">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                    <button class="btn-secondary" onclick="deleteItem('${id}')" style="flex:1; padding:5px; font-size:0.8rem; border-color:#ff4444; color:#ff4444;">
-                        <i class="fas fa-trash"></i> Borrar
-                    </button>
-                </div>
-            `;
-            catalogDiv.appendChild(badge);
-        });
-    } catch (error) {
-        console.error("Error al cargar:", error);
-        catalogDiv.innerHTML = "<p>Error al cargar catálogo.</p>";
-    }
+            </div>
+            <div style="margin-top:10px; display:flex; gap:5px;">
+                <button class="btn-secondary" onclick="prepareEdit('${item.id}')">Editar</button>
+                <button class="btn-secondary" style="color:red" onclick="deleteItem('${item.id}')">X</button>
+            </div>
+        `;
+        catalogDiv.appendChild(badge);
+    });
 }
 
-// Función para preparar la edición
-async function editItem(id) {
-    try {
-        const doc = await itemsRef.doc(id).get();
-        const item = doc.data();
-        editId = id;
-
-        // Rellenar campos básicos
-        document.getElementById('itemName').value = item.nombre;
-        document.getElementById('itemImg').value = item.imagen;
-        document.getElementById('itemCategory').value = item.categoria;
-        document.getElementById('isRaw').value = item.esMateriaPrima ? 'yes' : 'no';
-        document.getElementById('yield').value = item.rendimiento;
-        document.getElementById('station').value = item.estacion;
-
-        // Gestionar sección de receta
-        const section = document.getElementById('recipeSection');
-        section.style.display = item.esMateriaPrima ? 'none' : 'block';
-
-        // Limpiar y cargar ingredientes
-        document.getElementById('ingredientsList').innerHTML = '<label>Ingredientes:</label>';
-        if (item.receta && item.receta.length > 0) {
-            item.receta.forEach(ing => {
-                addIngredientRow(ing.nombre, ing.cantidad);
-            });
-        }
-
-        // Cambiar texto del botón y hacer scroll arriba
-        document.querySelector('.btn-primary').innerText = "Actualizar Objeto";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    } catch (error) {
-        alert("Error al recuperar el objeto");
-    }
+function filterCatalog() {
+    const text = document.getElementById('catalogSearch').value.toLowerCase();
+    const cat = document.getElementById('catalogFilter').value;
+    document.querySelectorAll('.item-badge').forEach(el => {
+        const matchesText = el.dataset.name.includes(text);
+        const matchesCat = cat === 'all' || el.dataset.category === cat;
+        el.style.display = (matchesText && matchesCat) ? 'block' : 'none';
+    });
 }
 
-// Función para borrar
-async function deleteItem(id) {
-    if (confirm("¿Seguro que quieres borrar este objeto de la base de datos?")) {
-        try {
-            await itemsRef.doc(id).delete();
-            loadCatalog();
-        } catch (error) {
-            alert("No se pudo borrar el objeto.");
-        }
+async function prepareEdit(id) {
+    const item = localItems.find(i => i.id === id);
+    editId = id;
+    document.getElementById('itemName').value = item.nombre;
+    document.getElementById('itemVersion').value = item.version || "Base";
+    document.getElementById('itemCategory').value = item.categoria;
+    document.getElementById('isRaw').value = item.esMateriaPrima ? 'yes' : 'no';
+    toggleRecipe();
+    if(!item.esMateriaPrima) {
+        document.getElementById('ingredientsList').innerHTML = "";
+        item.receta.forEach(ing => addIngredientRow(ing.nombre, ing.cantidad));
     }
+    window.scrollTo(0,0);
 }
 
 loadCatalog();

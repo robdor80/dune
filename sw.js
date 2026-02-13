@@ -1,13 +1,14 @@
-const CACHE_NAME = 'dune-v1';
+const CACHE_NAME = 'dune-v2';
 const assets = [
-  './index.html',
-  './admin.html',
-  './base.html',
-  './css/main.css',
-  './css/admin.css',
-  './js/db.js',
-  './js/calculadora.js',
-  './js/admin.js'
+  'index.html',
+  'admin.html',
+  'base.html',
+  'css/main.css',
+  'css/admin.css',
+  'css/base.css',
+  'js/db.js',
+  'js/calculadora.js',
+  'js/admin.js'
 ];
 
 self.addEventListener('install', e => {

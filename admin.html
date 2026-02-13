@@ -1,33 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dune Admin - Catálogo y Recetas</title>
-    
+    <title>Dune Admin - Gestión Avanzada</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff8c00">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA lista para Arrakis', reg))
-                    .catch(err => console.log('Error PWA', err));
-            });
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </head>
-
 <body class="dune-dark">
-
     <nav class="main-nav">
         <a href="index.html">Calculadora</a>
         <a href="base.html">Mi Base</a>
@@ -35,19 +22,31 @@
     </nav>
 
     <main class="container">
-        <h1>Gestión de Objetos y Recetas</h1>
-
         <section class="card">
-            <h2>Crear Nuevo Objeto</h2>
+            <h2><i class="fas fa-plus-circle"></i> Nuevo Objeto / Versión</h2>
             <form id="itemForm">
-                <div class="form-group">
-                    <label>Nombre del Objeto:</label>
-                    <input type="text" id="itemName" placeholder="Ej: Lingote de Acero" required>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Nombre del Objeto:</label>
+                        <input type="text" id="itemName" placeholder="Ej: Cimiento" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Versión:</label>
+                        <select id="itemVersion">
+                            <option value="Base">Base</option>
+                            <option value="Mk1">Mk1</option>
+                            <option value="Mk2">Mk2</option>
+                            <option value="Mk3">Mk3</option>
+                            <option value="Mk4">Mk4</option>
+                            <option value="Mk5">Mk5</option>
+                            <option value="Mk6">Mk6</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>URL de la Imagen (Icono):</label>
-                    <input type="url" id="itemImg" placeholder="https://ejemplo.com/imagen.png">
+                    <label>URL de la Imagen:</label>
+                    <input type="url" id="itemImg" placeholder="https://url-de-la-imagen.png">
                 </div>
 
                 <div class="form-row">
@@ -57,70 +56,60 @@
                             <option value="Basicos">Materiales Básicos</option>
                             <option value="Procesados">Procesados / Refinados</option>
                             <option value="Componentes">Componentes Complejos</option>
+                            <option value="Construccion">Construcción</option>
                             <option value="Estaciones">Estaciones de Trabajo</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>¿Es Materia Prima?</label>
+                        <label>Tipo:</label>
                         <select id="isRaw" onchange="toggleRecipe()">
-                            <option value="no">No (Se fabrica)</option>
-                            <option value="yes">Sí (Se recolecta)</option>
+                            <option value="no">Se fabrica (Receta)</option>
+                            <option value="yes">Materia Prima (Recolectable)</option>
                         </select>
                     </div>
                 </div>
 
                 <div id="recipeSection">
-                    <h3>Receta de Fabricación</h3>
+                    <h3><i class="fas fa-scroll"></i> Receta de Fabricación</h3>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Rendimiento (¿Cuántos salen?):</label>
-                            <input type="number" id="yield" value="1" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label>Estación Necesaria:</label>
-                            <input type="text" id="station" placeholder="Ej: Refinería">
-                        </div>
+                        <div class="form-group"><label>Rendimiento:</label><input type="number" id="yield" value="1"></div>
+                        <div class="form-group"><label>Estación:</label><input type="text" id="station" placeholder="Ej: Refinería"></div>
                     </div>
-
-                    <div id="ingredientsList">
-                        <label>Ingredientes:</label>
-                    </div>
+                    <div id="ingredientsList"></div>
                     <button type="button" class="btn-secondary" onclick="addIngredientRow()">
                         <i class="fas fa-plus"></i> Añadir Ingrediente
                     </button>
                 </div>
 
-                <div class="form-actions" style="margin-top: 20px;">
-                    <button type="submit" class="btn-primary">Guardar Objeto en la Especia</button>
-                </div>
+                <button type="submit" class="btn-primary" style="margin-top:20px;">Sincronizar con la Especia</button>
             </form>
         </section>
 
         <section class="card">
-            <h2>Catálogo Existente</h2>
-            <div id="itemsCatalog" class="catalog-grid">
-                <p>Cargando catálogo...</p>
+            <h2><i class="fas fa-inventory"></i> Catálogo de Arrakis</h2>
+            <div class="form-row" style="margin-bottom: 20px;">
+                <input type="text" id="catalogSearch" placeholder="Buscar objeto..." oninput="filterCatalog()">
+                <select id="catalogFilter" onchange="filterCatalog()">
+                    <option value="all">Todas las categorías</option>
+                    <option value="Basicos">Básicos</option>
+                    <option value="Procesados">Procesados</option>
+                    <option value="Componentes">Componentes</option>
+                    <option value="Construccion">Construcción</option>
+                </select>
             </div>
+            <div id="itemsCatalog" class="catalog-grid"></div>
         </section>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <script src="js/db.js"></script>
     <script src="js/admin.js"></script>
-
     <script>
-        // Función para ocultar/mostrar receta
         function toggleRecipe() {
-            const isRaw = document.getElementById('isRaw').value;
-            const section = document.getElementById('recipeSection');
-            section.style.display = (isRaw === 'yes') ? 'none' : 'block';
+            document.getElementById('recipeSection').style.display = 
+                (document.getElementById('isRaw').value === 'yes') ? 'none' : 'block';
         }
-
-        // Asegurar estado inicial al cargar
-        window.onload = toggleRecipe;
     </script>
 </body>
-
 </html>
