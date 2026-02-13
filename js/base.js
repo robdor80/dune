@@ -1,9 +1,9 @@
 const censusForm = document.getElementById('censusForm');
 const censusContainer = document.getElementById('censusContainer');
 const censusRef = db.collection("dune_census");
-let itemImages = {}; // Guardaremos las URLs aquí
+let itemImages = {}; 
 
-// 1. CARGAR CATÁLOGO Y MAPEAR IMÁGENES
+// 1. CARGAR CATÁLOGO E IMÁGENES
 async function loadItemSelect() {
     try {
         const snap = await itemsRef.orderBy('nombre').get();
@@ -12,11 +12,9 @@ async function loadItemSelect() {
         
         snap.forEach(doc => {
             const item = doc.data();
-            // Guardamos la imagen asociada al nombre para usarla luego
             if (item.imagen) {
                 itemImages[item.nombre] = item.imagen;
             }
-
             if (item.categoria !== "Basicos") {
                 const opt = document.createElement('option');
                 opt.value = item.nombre;
@@ -25,8 +23,7 @@ async function loadItemSelect() {
                 select.appendChild(opt);
             }
         });
-        // Una vez cargadas las imágenes, cargamos el censo
-        loadCensus();
+        loadCensus(); // Carga inicial
     } catch (e) { 
         console.error("Error catálogo:", e);
     }
@@ -35,7 +32,6 @@ async function loadItemSelect() {
 // 2. GUARDAR REGISTRO
 censusForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const data = {
         planta: document.getElementById('censusFloor').value,
         zona: document.getElementById('censusZone').value,
@@ -43,29 +39,33 @@ censusForm.addEventListener('submit', async (e) => {
         cantidad: parseInt(document.getElementById('censusQty').value),
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
-
     try {
         await censusRef.add(data);
         censusForm.reset();
         loadCensus();
-    } catch (e) { 
-        alert("Error al guardar"); 
-    }
+    } catch (e) { alert("Error al guardar"); }
 });
 
-// 3. CARGAR Y RENDERIZAR
+// 3. CARGAR CENSO (FILTRO CORREGIDO)
 async function loadCensus() {
     const floorFilter = document.getElementById('filterFloor').value;
-    censusContainer.innerHTML = "<p style='color: #888;'>Sincronizando...</p>";
+    censusContainer.innerHTML = "<p style='color: #888; padding: 20px;'>Sincronizando con Arrakis...</p>";
 
     try {
         let query = censusRef.orderBy("zona");
+        
+        // CORRECCIÓN: Filtrado por planta
         if (floorFilter !== "all") {
             query = query.where("planta", "==", floorFilter);
         }
 
         const snap = await query.get();
-        censusContainer.innerHTML = "";
+        censusContainer.innerHTML = ""; // Limpiamos el mensaje de sincronización
+
+        if (snap.empty) {
+            censusContainer.innerHTML = `<div style='color:#666; padding:20px;'>No hay maquinaria en ${floorFilter === 'all' ? 'toda la base' : floorFilter}.</div>`;
+            return;
+        }
 
         const groups = {};
         snap.forEach(doc => {
@@ -77,16 +77,14 @@ async function loadCensus() {
         for (const zona in groups) {
             const section = document.createElement('div');
             section.className = "census-zone-card";
-            
             let html = `<h3><i class="fas fa-th-large"></i> ZONA: ${zona}</h3>`;
+            
             groups[zona].forEach(item => {
-                // Buscamos si tenemos imagen para este objeto, si no, una por defecto
-                const imgUrl = itemImages[item.nombre] || 'https://via.placeholder.com/40?text=?';
-                
+                const imgUrl = itemImages[item.nombre] || 'https://via.placeholder.com/45?text=?';
                 html += `
                     <div class="census-item">
                         <div class="info">
-                            <img src="${imgUrl}" class="census-img" alt="${item.nombre}">
+                            <img src="${imgUrl}" class="census-img" alt="${item.nombre}" onerror="this.src='https://via.placeholder.com/45?text=?'">
                             <span class="qty">${item.cantidad}x</span>
                             <span class="name">${item.nombre}</span>
                             <span class="planta-tag">${item.planta}</span>
@@ -94,13 +92,15 @@ async function loadCensus() {
                         <button class="btn-del" onclick="deleteCensus('${item.id}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
-                    </div>
-                `;
+                    </div>`;
             });
             section.innerHTML = html;
             censusContainer.appendChild(section);
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Error en filtro:", e);
+        censusContainer.innerHTML = "<p style='color:red;'>Error al filtrar los datos.</p>";
+    }
 }
 
 async function deleteCensus(id) {
@@ -110,6 +110,4 @@ async function deleteCensus(id) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadItemSelect();
-});
+document.addEventListener('DOMContentLoaded', loadItemSelect);
